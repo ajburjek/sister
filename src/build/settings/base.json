@@ -1,0 +1,6 @@
+{
+    "app_name": "Two-Body Computed Orbit",
+    "author": "crsimpson",
+    "main_module": "src/main/python/main.py",
+    "version": "0.0.0"
+}
