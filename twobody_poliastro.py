@@ -5,7 +5,6 @@ import astropy.units as u
 import numpy as np
 from poliastro.bodies import Earth
 from poliastro.twobody import Orbit
-from poliastro.plotting import OrbitPlotter2D
 
 """Python 3.7
    Simpson Aerospace (c) 2019
@@ -20,8 +19,12 @@ aop  = 28.6368 * u.deg
 nu   = 331.5244 * u.deg
 ss = Orbit.from_classical(Earth, a, ecc, inc, raan, aop, nu)
 ss.plot()
-X = np.empty([6,86400])
-ss_update = ss.propagate(30*u.second)
-for t in range(0,86401):
-    ss_update = ss.propagate(float(t)*u.second)
-    X[0:6,t] = [[ss_update.r[0]], [ss_update.r[1]], [ss_update.r[2]], [ss_update.v[0]], [ss_update.v[1]], [ss_update.v[2]]]
+
+X = np.empty([6,1])
+t = np.linspace(0,86400,num=86401)
+for i in range(0,t.size):
+    ss_update = ss.propagate(t[i]*u.second)
+#    if i==0:
+#        X = np.insert(X, 0, [[ss_update.r[0].value], [ss_update.r[1].value], [ss_update.r[2].value], [ss_update.v[0].value], [ss_update.v[1].value], [ss_update.v[2].value]], axis=1)
+#    else:
+    X = np.append(X, [[ss_update.r[0].value], [ss_update.r[1].value], [ss_update.r[2].value], [ss_update.v[0].value], [ss_update.v[1].value], [ss_update.v[2].value]], axis=1)
