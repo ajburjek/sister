@@ -39,7 +39,8 @@ ss = Orbit.from_classical(Earth, a, ecc, inc, raan, aop, nu, epoch=t_ob)
 X = mean_motion(Earth.k, ss.r, ss.v, t_del_nounit)
 ss_SkyCoord = SkyCoord(X[0][:,0], X[0][:,1], X[0][:,2], frame = 'gcrs', representation_type='cartesian')
 ssaltaz_hh = ss_SkyCoord.transform_to(frame_now_hh)
-
-time_rec = Time_Received(ssaltaz_hh.distance,t_interval)
-time_alt = Alter_Time(time_rec)
-residual = Residuals(time_rec,time_alt)
+for i in range(0,ssaltaz_hh.alt.size):
+    if ssaltaz_hh.alt[i]>=0*u.deg:
+        time_rec = Time_Received(ssaltaz_hh.distance,t_interval)
+        time_alt = Alter_Time(time_rec)
+        residual = Residuals(time_rec,time_alt)
