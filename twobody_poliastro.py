@@ -9,6 +9,7 @@ from poliastro.twobody import Orbit
 from poliastro.twobody.propagation import mean_motion
 from astropy.coordinates import EarthLocation, SkyCoord, AltAz, GCRS, ICRS
 from astropy.time import Time, TimeDelta
+from Calc_Residuals import Time_Received, Alter_Time, Residuals
 
 
 """Python 3.7
@@ -23,7 +24,7 @@ t_ob = Time(Time.now(),scale='tai')
 delta_t = TimeDelta(np.linspace(0,86400,num=86401)*u.second,scale='tai')
 t_del_nounit = np.linspace(0,86400,num=86401)*u.second
 
-
+t_interval = 10*u.second
 #topocentric frame at Hardaway Hall
 frame_now_hh = AltAz(obstime=t_ob+delta_t,location=loc_hh)
 #ISS
@@ -39,3 +40,6 @@ X = mean_motion(Earth.k, ss.r, ss.v, t_del_nounit)
 ss_SkyCoord = SkyCoord(X[0][:,0], X[0][:,1], X[0][:,2], frame = 'gcrs', representation_type='cartesian')
 ssaltaz_hh = ss_SkyCoord.transform_to(frame_now_hh)
 
+time_rec = Time_Received(ssaltaz_hh.distance,t_interval)
+time_alt = Alter_Time(time_rec)
+residual = Residuals(time_rec,time_alt)
