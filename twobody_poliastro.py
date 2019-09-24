@@ -46,4 +46,4 @@ def hh_obs(a    = 6799.18 * u.km, ecc  = 0.0008424 * u.one, inc  = 51.6403 * u.d
 #            time_alt = Alter_Time(time_rec)
 #            residual = Residuals(time_rec,time_alt)
     
-    return ssaltaz_hh, X
+    return ssaltaz_hh, ss
