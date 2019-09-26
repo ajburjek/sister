@@ -26,10 +26,11 @@ rooturl = 'http://www.celestrak.com/NORAD/elements/supplemental/'
 iss_tles = download_file(rooturl+'iss.txt')
 coe, yd = readtle.readtle(iss_tles)
 
-julianday = np.empty([1,yd.size])
+julianday = np.empty([0])
+i=0
 for i in range(yd.shape[1]):
     mon, day, hr, minute, sec = daysToMonDayHrMinSec(yd[0,i],yd[1,i])
-    julianday = np.insert(julianday, i, jday(yd[0,i], mon, day, hr, minute, sec))
+    julianday = np.hstack([julianday, jday(yd[0,i], mon, day, hr, minute, sec)])
         
 epoch_tles = Time(julianday, format='jd', scale='ut1')
 
@@ -44,10 +45,10 @@ Xf_tle_n = Orbit.from_classical(Earth,
                                 nu*u.deg,
                                 epoch = epoch_tles[yd.shape[1]-1])
 
-Xf_n = mean_motion(Earth.k, Xf_tle_n.r, Xf_tle_n.v, np.linspace(0,0,num=2)*u.s)
+Xf_n = mean_motion(Earth.k, Xf_tle_n.r, Xf_tle_n.v, np.linspace(0,0,num=1)*u.s)
 # fill orbit
 i=0
-X_res = np.empty([6,yd.shape[1]-1])
+X_res = np.empty((6,1))
 for i in range(yd.shape[1]-1):
     nu = D_to_nu(coe[5,i])
     X0_tle_i = Orbit.from_classical(Earth,
@@ -58,10 +59,16 @@ for i in range(yd.shape[1]-1):
                                     coe[4,i]*u.deg, 
                                     nu*u.deg,
                                     epoch = epoch_tles[i])
-    tof = np.linspace((epoch_tles[yd.shape[1]-1]-epoch_tles[i]).sec,(epoch_tles[yd.shape[1]-1]-epoch_tles[i]).sec, num=2)*u.s
+    tof = np.linspace((epoch_tles[yd.shape[1]-1]-epoch_tles[i]).sec,(epoch_tles[yd.shape[1]-1]-epoch_tles[i]).sec, num=1)*u.s
     Xf_tle_i = mean_motion(Earth.k, X0_tle_i.r, X0_tle_i.v, tof)
-    temp = np.array([[Xf_tle_i[0][0,:]-Xf_n[0][0,:]],[Xf_tle_i[1][0,:]-Xf_n[1][0,:]]]).reshape(6,0)
-    X_res = np.insert(X_res, i, temp)
+    temp_r = np.array([Xf_tle_i[0][0,:]-Xf_n[0][0,:]]).reshape(3,1)
+    temp_v = np.array([Xf_tle_i[1][0,:]-Xf_n[1][0,:]]).reshape(3,1)
+    X_res = np.hstack([X_res,np.vstack([temp_r,temp_v])])
+    del(temp_r)
+    del(temp_v)
 
-mean_X = X_res/(yd.shape[1]-2)
+X_res = np.delete(X_res, 0, axis=1)
+mean_X = X_res.sum(axis=1)/(yd.shape[1]-2) #km, km/sec
+cov_x = (X_res-mean_X.reshape(6,1)).sum(axis=1).reshape(6,1)*((X_res-mean_X.reshape(6,1)).sum(axis=1))/(yd.shape[1]-3)
+
     
