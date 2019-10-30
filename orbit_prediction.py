@@ -12,6 +12,7 @@ from poliastro.twobody import Orbit
 import readtle
 from downloadfileurl import download_file
 from time_helper import daysToMonDayHrMinSec, jday
+from poliastro.core.propagation import mean_motion as mean_motion_fast
 
 """Python 3.7
    Simpson Aerospace (c) 2019
@@ -25,10 +26,14 @@ rooturl = 'http://www.celestrak.com/NORAD/elements/supplemental/'
 iss_tles = download_file(rooturl+'iss.txt')
 coe, yd = readtle.readtle(iss_tles)
 
-
 def mean_motion(k, r, v, tofs, **kwargs):
     
-    results = [mean_motion(k, r, v, tof) for tof in tofs]
+    k = Earth.k
+    r0 = Xf_tle_n.r
+    v0 = Xf_tle_n.v
+    tofs = np.linspace(0.0,0.0,num=1)*u.s
+    
+    results = [mean_motion_fast(k, r0, v0, tof) for tof in tofs]
     return (
         [result[0] for result in results] * u.km,
         [result[1] for result in results] * u.km / u.s,
